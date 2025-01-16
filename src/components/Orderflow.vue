@@ -1,179 +1,132 @@
 <template>
-  <div class="grow overflow-y-auto overflow-x-auto text-xxs pb-8 w-full">
-    <div v-for="px in prices" :key="px">
-      <div class="flex flex-row text-xxs">
-        <div
-          v-for="(item, index) in ladder[px]['from'].slice(-20)"
-          :key="index"
-          class="w-10 flex-shrink-0 px-1 pt- mb- mr- cursor-pointer flex items-center justify-between"
-          :class="getDeltaColor(item)"
-          @click="console.log(item)"
-        >
-          <div class="flex flex-row">
-            <div
-              class="font-bold"
-              v-for="n in Array(timeDots(item['utc'])).fill()"
-              :key="n"
-            >
-              &#8226;
+  <div class="bg-slate-10 relative ">
+    <div class="flex h-screen w-screen z-10">
+      <div class="bg-slate-200 shadow flex flex-col  absolute right-0 top-12 w-72 bottom-0 px-10 py-6">
+        <div class="bg-slate-80 py- flex text-xs justify-between">
+          <div @click="handleChangeMarket('DAX')" class="text-white rounded p-1 font-bold w-14 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'DAX' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">DAX</div>
+          <div @click="handleChangeMarket('ES')" class="text-white rounded p-1 font-bold w-14 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'ES' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">ES</div>
+          <div @click="handleChangeMarket('NQ')" class="text-white rounded p-1 font-bold w-14 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'NQ' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">NQ</div>
+          <!-- <div @click="handleChangeMarket('NAS')" class="text-white rounded p-1 font-bold w-16 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'NAS' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">ES</div> -->
+        </div>
+        <div class="bg-slate-80 mt-8">
+          <div class="uppercase text-xs font-bold mb-4 text-slate-500">Trading params</div>
+          <div class="flex flex-col">
+            <div class="flex flex-row mb-2 justify-between text-xs">
+              <div class="mr-2">Size:</div>
+              <input
+                type="text"
+                class="px-2 min-w-12 max-w-12 text-xs"
+                v-model="options.size"
+              />
+            </div>
+            <div class="flex flex-row mb-2 justify-between text-xs">
+              <div class="mr-2">SL:</div>
+              <input
+                type="text"
+                class="px-2 min-w-12 max-w-12 text-xs"
+                v-model="options.stop"
+              />
+            </div>
+            <div class="flex flex-row mb-2 justify-between text-xs">
+              <div class="mr-2">TP:</div>
+              <input
+                type="text"
+                class="px-2 min-w-12 max-w-12 text-xs"
+                v-model="options.limit"
+              />
+            </div>
+            <div class="flex flex-row mb-2 justify-between text-xs">
+              <div class="mr-2">Spread:</div>
+              <input
+                type="text"
+                class="px-2 min-w-12 max-w-12 text-xs"
+                v-model="options.spread"
+              />
+            </div>
+            <div class="flex flex-row mb-2 justify-between text-xs">
+              <div class="mr-2">Adj:</div>
+              <input
+                type="text"
+                class="px-2 min-w-12 max-w-12 text-xs"
+                v-model="options.adj"
+              />
             </div>
           </div>
-          <div class=""></div>
-          <div class="">
-            {{
-              Object.keys(item).length === 0
-                ? ""
-                : item["chg"] == 0
-                ? `=${item["volume"]}`
-                : item["chg"] > 0
-                ? item["volume"]
-                : -item["volume"]
-            }}
-          </div>
         </div>
-        <div
-          class="w-72 border-t border-t-slate-300 border-l border-l-slate-500 border-r border-r-slate-500 flex flex-row ml-2 mr-2"
-        >
-          <div
-            class="text-center w-28 leading-relaxed cursor-pointer border-r border-r-slate-500 font-bold"
-            :class="
-              getTotalDeltaColor(ladder[px]['from'].slice(-1)[0]['delta'])
-            "
-          >
-            {{ ladder[px]["from"].slice(-1)[0]["delta"] }}
-          </div>
-          <div
-            class="px-1 text-slate-500 text-center leading-relaxed cursor-pointer hover:bg-rose-400 hover:text-white w-24"
-            @mousedown="
-              handleMouseDown(
-                $event,
-                (
-                  parseFloat(px) +
-                  parseFloat(options.adj) -
-                  parseFloat(options.spread) / 2
-                ).toFixed(2),
-                true
-              )
-            "
-          >
-            {{
-              (
-                parseFloat(px) +
-                parseFloat(options.adj) -
-                parseFloat(options.spread) / 2
-              ).toFixed(2)
-            }}
-          </div>
-          <div
-            class="text-center w-24 cursor-pointer border-r border-r-slate-500"
-            :class="getTotalVolumeColor(ladder[px]['to'][0]['total_volume'])"
-          >
-            {{ ladder[px]["to"][0]["total_volume"] }}
-          </div>
-          <div
-            class="px-1 font-bold text-center leading-relaxed cursor-pointer w-24"
-            :class="priceColor(px)"
-          >
-            {{ (parseFloat(px) + parseFloat(options.adj)).toFixed(2) }}
-          </div>
-          <div
-            class="text-center w-24 leading-relaxed cursor-pointer border-l border-l-slate-500"
-            :class="
-              getTotalDeltaColor(
-                ladder[px]['from'].slice(-1)[0]['delta'] +
-                  ladder[px]['to'][0]['delta']
-              )
-            "
-          >
-            {{
-              ladder[px]["from"].slice(-1)[0]["delta"] +
-              ladder[px]["to"][0]["delta"]
-            }}
-          </div>
-          <div
-            class="px-1 text-slate-500 text-center leading-relaxed cursor-pointer hover:bg-teal-400 hover:text-white w-24"
-            @mousedown="
-              handleMouseDown(
-                $event,
-                (
-                  parseFloat(px) +
-                  parseFloat(options.adj) +
-                  parseFloat(options.spread) / 2
-                ).toFixed(2),
-                false
-              )
-            "
-          >
-            {{
-              (
-                parseFloat(px) +
-                parseFloat(options.adj) +
-                parseFloat(options.spread) / 2
-              ).toFixed(2)
-            }}
-          </div>
-          <div
-            class="text-center w-28 leading-relaxed cursor-pointer font-bold"
-            :class="getTotalDeltaColor(ladder[px]['to'][0]['delta'])"
-          >
-            {{ ladder[px]["to"][0]["delta"] }}
-          </div>
-        </div>
-        <div
-          v-for="(item, index) in ladder[px]['to'].slice(0, 20)"
-          :key="index"
-          class="w-10 flex-shrink-0 px-1 pt- mb- mr- cursor-pointer flex items-center justify-between"
-          :class="getDeltaColor(item)"
-          @click="console.log(item)"
-        >
-          <div class="">
-            {{
-              Object.keys(item).length === 0
-                ? ""
-                : item["chg"] == 0
-                ? `=${item["volume"]}`
-                : item["chg"] > 0
-                ? item["volume"]
-                : -item["volume"]
-            }}
-          </div>
-          <div class="flex flex-row">
-            <div
-              class="font-bold"
-              v-for="n in Array(timeDots(item['utc'])).fill()"
-              :key="n"
-            >
-              &#8226;
+
+
+        <div class="bg-slate-80">
+          <div class="uppercase text-xs font-bold mt-8 mb-4 text-slate-500">Display params</div>          
+          <div class="flex flex-col">
+            <div class="flex flex-row mb-2 justify-between text-xs">
+              <div class="mr-2">Max Cell:</div>
+              <input
+                type="text"
+                class="px-2 min-w-12 max-w-12  text-xs"
+                v-model="options.maxCell"
+              />
+            </div>
+            <div class="flex flex-row mb-2 justify-between text-xs">
+              <div class="mr-2">Max Volume:</div>
+              <input
+                type="text"
+                class="px-2 min-w-12 max-w-12  text-xs"
+                v-model="options.maxVolume"
+              />
+            </div>
+            <div class="flex flex-row mb-2 justify-between text-xs">
+              <div class="mr-2">Max Delta:</div>
+              <input
+                type="text"
+                class="px-2 min-w-12 max-w-12  text-xs"
+                v-model="options.maxTotal"
+              />
             </div>
           </div>
         </div>
       </div>
+      <LadderContainer />
+      <div
+        class="fixed left-0 w-80 top-12 bottom-0 flex flex-col"
+      >
+        <TimePriceVol />
+        <div class="overflow-y-scroll h-96 " ref="scrollContainer" >
+          <div class="sticky top-0 bg-slate-200 text-xxs py-1 pl-1 font-bold uppercase border-t border-t-slate-300 z-50 shadow-lg">Comments</div>
+          <Comments class="z-10 " @scroll-to-bottom="scrollToBottom"/>
+        </div>
+        <EnterComment/>
+      </div>
+      <CellDetail
+        v-if="selectedCell.selectedCell"
+        :selectedCell="selectedCell.selectedCell"
+        :from="selectedCell.from"
+      />
+      <!-- <orderflow /> -->
     </div>
-    <!-- <div class="flex flex-row">
-      <div class="bg-teal-200">lhs</div>
-      <div class="bg-slate-200">px</div>
-      <div class="bg-rose-200">rhs</div>
-    </div> -->
   </div>
 </template>
 
 <script>
 import {
   loadData,
-  prices,
-  ladder,
-  // recentPrices,
+  utc,
+  selectedMarket,
+  changeMarket,
   options,
+  initOptions,
   intervals,
-} from "../state";
-import { placeOrder } from "../execution";
-import { reactive } from "vue";
+  selectedCell,
+} from "../stateOrderflow";
+import { nextTick, onMounted,ref } from "vue";
+import LadderContainer from "./LadderContainer.vue";
+import TimePriceVol from "./TimePriceVol.vue";
+import CellDetail from "./CellDetail.vue";
+import Comments from "./Comments.vue";
+import EnterComment from "./EnterComment.vue";
 export default {
+  components: { LadderContainer, TimePriceVol, CellDetail, Comments,EnterComment },
   setup() {
-    const showTooltip = reactive({ index: null });
-    const grads = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 900];
-    const maxOpacity = 1.0;
-    const minOpacity = 0;
+    const scrollContainer = ref(null);
     const formatTime = (timestamp, ms = false) => {
       const date = new Date(parseFloat(timestamp));
       const hours = String(date.getUTCHours()); // 24-hour format, padded to 2 digits
@@ -184,151 +137,48 @@ export default {
         ms ? "   [" + milliseconds + "]" : ""
       }`;
     };
-    const priceColor = (price) => {
-      // return "bg-slate-200 text-black";
-      // if (price == recentPrices.value_[0]) return "bg-slate-900 text-white   ";
-      // if (price == recentPrices.value_[1]) return "bg-slate-600 text-white ";
-      // if (price == recentPrices.value_[2]) return "bg-slate-400 text-white ";
-      // if (price == recentPrices.value_[3]) return "bg-slate-300 text-black ";
-      // if (price == recentPrices.value_[4]) return "bg-slate-200 text-black ";
-      // if (price == recentPrices.value_[5])
-      //   return "bg-slate-300 text-black ";
-      // if (price == recentPrices.value_[6])
-      //   return "bg-slate-200 text-black ";
-      // if (price == recentPrices.value_[7])
-      //   return "bg-slate-100 text-black ";
-      return "bg-slate-50 text-black ";
+    const handleChangeMarket = (instrument) => {
+      changeMarket(instrument);
     };
-    const handleMouseDown = (event, px, dir) => {
-      console.log("Cell value_:", px);
-      // console.log(intervals.value_[0].value_["time"]);
-      // console.log(totals.value_);
-      // console.log("handlee: ", px, dir);
-      placeOrder(px, dir);
+    const load = () => {
+      // initOptions();
+      // loadData();
     };
-    const getTotalVolumeColor = (vol) => {
-      const opacity =
-        vol >= options.maxVolume
-          ? maxOpacity
-          : minOpacity + (vol / options.maxVolume) * (maxOpacity - minOpacity);
-      // Return the RGBA color
-      const grad = Math.round(opacity * 10);
-      let color = "cyan";
-      const background = `bg-${color}-${grads[grad]}`;
-      return `${background} ${grad > 3 ? " text-white" : ""}`;
-    };
-    const getTotalDeltaColor = (delta) => {
-      const absDelta = Math.abs(delta);
-      const opacity =
-        absDelta >= options.maxTotal
-          ? maxOpacity
-          : minOpacity +
-            (absDelta / options.maxTotal) * (maxOpacity - minOpacity);
-      // Return the RGBA color
-      const grad = Math.round(opacity * 10);
-      let color;
-      if (delta < 0) {
-        color = "rose";
+    const scrollToBottom = async () => {
+      console.log("scrolling to bottom")
+      console.log(scrollContainer.value)
+      if (scrollContainer.value) {
+        await nextTick()
+        console.log("scrolling to bottom - container")
+        console.log("Container dimensions:");
+console.log("scrollHeight:", scrollContainer.value.scrollHeight); // Total content height
+console.log("offsetHeight:", scrollContainer.value.offsetHeight); // Visible height
+console.log("scrollTop:", scrollContainer.value.scrollTop); // Curren        
+        console.log(scrollContainer.value.scrollHeight, scrollContainer.value.scrollTop )
+        scrollContainer.value.scrollTop = scrollContainer.value.scrollHeight// - scrollContainer.value.offsetHeight + 100;
+        console.log(scrollContainer.value.scrollHeight, scrollContainer.value.scrollTop )
       }
-      if (delta == 0) {
-        color = "slate";
-      }
-      if (delta > 0) {
-        color = "teal";
-      }
-      const background = `bg-${color}-${grads[grad]}`;
-      return `${background} ${grad > 3 ? " text-white" : ""}`;
-    };
-    const getDeltaColor = (item) => {
-      let delta =
-        item["chg"] == 0
-          ? 0
-          : item["chg"] > 0
-          ? item["volume"]
-          : -item["volume"];
-      const delta_abs = Math.abs(delta);
-      const opacity =
-        delta_abs >= options.maxCell
-          ? maxOpacity
-          : minOpacity +
-            (delta_abs / options.maxCell) * (maxOpacity - minOpacity);
-      // Return the RGBA color
-      const grad = Math.round(opacity * 10);
-      let color;
-      if (delta < 0) {
-        color = "rose";
-      }
-      if (delta == 0) {
-        color = "slate";
-      }
-      if (delta > 0) {
-        color = "teal";
-      }
-      const volume = Math.abs(item["volume"]);
-      const opacityBorder =
-        volume >= options.maxCell
-          ? maxOpacity
-          : minOpacity + (volume / options.maxCell) * (maxOpacity - minOpacity);
-      // Return the RGBA color
-      const gradBorder = Math.round(opacityBorder * 10);
-      let colorBorder;
-      let border;
-      if (gradBorder < 10 || Object.keys(item).length == 0) {
-        border = "border-l border-l-white border-r border-r-white";
-      } else {
-        if (item["chg"] > 0) {
-          colorBorder = "teal";
-        } else if (item["chg"] < 0) {
-          colorBorder = "rose";
-        } else {
-          colorBorder = "slate";
-        }
-        border = `border-2 border-${colorBorder}-${grads[gradBorder]}`;
-      }
-      //   colorBorder = "rose";
-      // }
-      // if (item["chg"] == 0) {
-      //   colorBorder = "slate";
-      // }
-      // if (item["chg"] > 0) {
-      //   colorBorder = "teal";
-      // }
-      const background = `bg-${color}-${grads[grad]}`;
-      // if (!item["volume"]) {
-      //   border = "border border-white";
-      // } else {
-      //   border = `border-${colorBorder}-${grads[gradBorder]}`;
-      // }
+    };    
+    onMounted(() => {
+      // console.log("mounted app");
+      initOptions();
 
-      return `${background} ${grad > 3 ? " text-white" : ""} border ${border}`;
-      //   grad > 8
-      //     ? "text-bold border-2 border-" +
-      //       color +
-      //       `-500 border-b border-${color}-500`
-      //     : `border-2 border-white`
-      // }`;
-    };
-    const timeDots = (utc) => {
-      if (utc > intervals[0]) return 3;
-      if (intervals.length > 0) {
-        if (utc > intervals[1]) return 2;
-      }
-      if (intervals.length > 1) {
-        if (utc > intervals[2]) return 1;
-      }
-      return 0;
-    };
+    });
     return {
+      utc,
+      TimePriceVol,
+      CellDetail,
       formatTime,
-      prices,
-      ladder,
-      getDeltaColor,
-      priceColor,
-      getTotalDeltaColor,
-      getTotalVolumeColor,
+      selectedMarket,
+      handleChangeMarket,
+      load,
       options,
-      handleMouseDown,
-      timeDots,
+      intervals,
+      selectedCell,
+      EnterComment,
+      Comments,
+      scrollContainer,
+      scrollToBottom
     };
   },
 };

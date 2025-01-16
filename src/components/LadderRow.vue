@@ -154,7 +154,7 @@ import {
   intervals,
   selectedCell,
   changeSelectedCell,
-} from "../state";
+} from "../stateOrderflow";
 import { placeOrder } from "../execution";
 import { reactive, ref } from "vue";
 export default {

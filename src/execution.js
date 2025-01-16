@@ -1,5 +1,5 @@
 import axios from 'axios'
-import {options, selectedMarket } from "./state.js"
+import {options, selectedMarket } from "./stateOrderflow.js"
 
 
 
@@ -13,7 +13,7 @@ const placeOrder = async (px, sell=true) => {
   console.log("size: ", options.size)
   console.log("stop: ", stop)
   console.log("limit: ", limit)
-  fetch('http://127.0.0.1:5000/',{
+  fetch('http://192.168.1.186:5000/',{
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

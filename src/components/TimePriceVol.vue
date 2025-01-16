@@ -1,12 +1,12 @@
 <template>
-  <div class="mx-4">
+  <div class=" overflow-y-scroll h-1/2">
     <div
       class="text-xxs border-b border-b-slate-200 border-t border-t-slate-200 flex flex-row"
       v-for="(item, index) in tpv"
       :key="index"
     >
       <div
-        class="w-12 text-slate-400 px-2 border-r border-r-slate-500 border-l border-l-slate-500 bg-slate-100"
+        class="w-16 text-slate-400 px-2 border-r border-r-slate-300 border-l border-l-slate-300 bg-slate-100"
       >
         {{ formatTime(item["from"]["utc"]) }}
       </div>
@@ -16,8 +16,8 @@
       >
         {{ item["from"]["delta"] }}
       </div> -->
-      <div class="w-12 text-center border-r-2 border-r-slate-500 bg-white">
-        {{ item["from"]["price"].toFixed(2) }}
+      <div class="w-16 text-center border-r-2 border-r-slate-300 bg-white">
+        {{ (item["from"]["price"]+parseFloat(options.adj)).toFixed(2) }}
       </div>
       <div
         class="w-12 text-center font-bold"
@@ -31,11 +31,11 @@
       >
         {{ item["from"]["volume"] * (item["from"]["chg"] < 0 ? -1 : 1) }}
       </div>
-      <div class="w-12 text-center border-l-2 border-l-slate-500 bg-white">
-        {{ item["to"]["price"].toFixed(2) }}
+      <div class="w-16 text-center border-l-2 border-l-slate-300 bg-white">
+        {{ (item["to"]["price"] + parseFloat(options.adj)).toFixed(2) }}
       </div>
       <!-- <div
-        class="w-12 text-center border-r border-r-slate-500"
+        class="w-12 text-center border-r border-r-slate-300"
         :class="getTotalDeltaColor(item['to']['delta'])"
       >
         {{ item["to"]["delta"] }}
@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import { tpv, options } from "../state";
+import { tpv, options } from "../stateOrderflow";
 export default {
   setup() {
     const grads = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 900];

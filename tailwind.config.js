@@ -186,7 +186,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Segoe UI', 'sans-serif'],
+        sans: ['Nunito', 'Roboto', 'ui-sans-serif', 'system-ui'], // Set 'Roboto' as the default sans font
       },
     },
   },

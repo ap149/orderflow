@@ -46,7 +46,7 @@
 </template>
 
 <script>
-import { changeSelectedCell } from "../state";
+import { changeSelectedCell } from "../stateOrderflow";
 export default {
   props: {
     // Props definition is here
