@@ -1,12 +1,12 @@
 <template>
-    <div     class="flex h-screen w-screen z-10 pt-12 bg-slate-200 ">
+    <div     class="flex h-screen w-screen z-10 pt-12 bg-slate-100 ">
         <div class="  overflow-x-hidden flex select-none"   >
-            <div class="bg-slate-800 p-1 cursor-pointer  text-xs flex-1" @click="toggleLHS">
-                <div class="w- pt- px-1">
-                    <div v-if="!isLHSOpen"  class="rounded hover:bg-slate-500 hover:text-white rounded-full  text-white p-1 px-1 w-10 h-10 flex items-center justify-center">
+            <div class="bg-slate-200 p-1 cursor-pointer  text-xs flex-1 border-r border-r-slate-300" @click="toggleLHS">
+                <div class="w- pt- px-1 ">
+                    <div v-if="!isLHSOpen"  class="rounded hover:bg-slate-400 hover:text-white rounded-full  text-slate-400 hover:text-white p-1 px-1 w-10 h-10 flex items-center justify-center">
                         <CalendarIcon class=""/>
                     </div>
-                    <div v-else  class="rounded hover:bg-slate-500 hover:text-white rounded-full  text-white p-1 px-1 w-10 h-10 flex items-center justify-center">
+                    <div v-else  class="rounded hover:bg-slate-400 hover:text-white rounded-full  text-slate-400 hover:text-white p-1 px-1 w-10 h-10 flex items-center justify-center">
                         <ChevronLL />
                     </div>
                 </div>
@@ -22,14 +22,14 @@
         </div>
         <div class="  overflow-x-hidden flex select-none"   >
             <div v-if="isRHSOpen" class="py-1 px-4 w-[50rem]">
-            <p>trade analysis</p>
+            <TradeAnalysis/>
         </div>
-            <div class="bg-slate-800 p-1 cursor-pointer  text-xs flex-1" @click="toggleRHS">
+            <div class="bg-slate-100 p-1 cursor-pointer  text-xs flex-1 border-l border-l-slate-300" @click="toggleRHS">
                 <div class="w- pt- px-1">
-                    <div v-if="!isRHSOpen"  class="rounded hover:bg-slate-500 hover:text-white rounded-full  text-white p-1 px-1 w-10 h-10 flex items-center justify-center">
+                    <div v-if="!isRHSOpen"  class="rounded hover:bg-slate-400 hover:text-white rounded-full  text-slate-400 hover:text-white p-1 px-1 w-10 h-10 flex items-center justify-center">
                         <ChartIcon/>
                     </div>
-                    <div v-else  class="rounded hover:bg-slate-500 hover:text-white rounded-full  text-white p-1 px-1 w-10 h-10 flex items-center justify-center">
+                    <div v-else  class="rounded hover:bg-slate-400 hover:text-white rounded-full  text-slate-400 hover:text-white p-1 px-1 w-10 h-10 flex items-center justify-center">
                         <ChevronRR />
                     </div>
                 </div>
@@ -44,16 +44,17 @@
 <script>
 import Calendar from './Calendar.vue';
 import TradeLog from './TradeLog.vue';
-import { trades } from '../stateJournal';
+import { trades, tradeInfo } from '../stateJournal';
 import Analysis from './Analysis.vue';
 import {ref} from "vue";
 import CalendarIcon from './Icons/CalendarIcon.vue';
 import ChevronLL from './Icons/ChevronLL.vue';
 import ChartIcon from './Icons/ChartIcon.vue';
 import ChevronRR from "./Icons/ChevronRR.vue"
+import TradeAnalysis from './TradeAnalysis.vue';
 
 export default {
-    components: {Calendar, TradeLog, Analysis, CalendarIcon, ChevronLL, ChartIcon, ChevronRR},
+    components: {Calendar, TradeLog, Analysis, CalendarIcon, ChevronLL, ChartIcon, ChevronRR, TradeAnalysis},
     setup(){
         const isLHSOpen = ref(true);
         const isRHSOpen = ref(false);
@@ -84,7 +85,9 @@ export default {
             CalendarIcon,
             ChevronLL,
             ChevronRR,
-            ChartIcon
+            ChartIcon,
+            TradeAnalysis,
+            tradeInfo
         }
     }
 }

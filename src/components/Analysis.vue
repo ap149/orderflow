@@ -31,7 +31,7 @@ import { selectedDay, selectedMkt, trades } from '../stateJournal';
 import { formatTime, formatDate, timeDiff } from '../utils';
 import { getDatabase, ref as dbRef, query, orderByChild, startAt, endAt, onChildAdded, orderByKey, update, get } from 'firebase/database';
 import { database } from "../firebase";
-import ChartComponent from './ChartComponent.vue';
+import ChartComponent from './Charts/ChartDayPnl.vue';
 import JournalEntry from './JournalEntry.vue';
 export default {
     components: {ChartComponent, JournalEntry},

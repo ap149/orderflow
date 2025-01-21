@@ -7,7 +7,7 @@
   <script>
   import { defineComponent, ref, onMounted, watch } from "vue";
   import { Chart, registerables } from "chart.js";
-  import { trades } from "../stateJournal";
+  import { trades } from "../../stateJournal";
   
   Chart.register(...registerables);
   

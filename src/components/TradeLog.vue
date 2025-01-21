@@ -43,7 +43,7 @@
                         <div class="text-right font-extrabold pr-" :class="trade.Pnl < 0 ? 'text-rose-400' : 'text-teal-400'">{{trade.Pnl > 0 ? '+': ''}}{{formatCurrency(trade.Pnl)}}</div>
                         <div class="text-right font-extrabold" :class="trade.Pnl < 0 ? 'text-rose-400' : 'text-teal-400'">{{trade.Pnl > 0 ? '+': ''}}{{trade.Points.toFixed(1)}} pts</div>
                     </div>
-                    <div class="px-1 grow cursor-pointer">
+                    <div class="px-1 grow cursor-pointer" @click="loadTradeHandler(trade)">
                         <!-- <div class="text-right">{{formatNumber(trade.OpenPrice)}}</div> -->
                         <ProgressBar class="" :value="trade.Points" :minRange="trade.Direction == 1 ? (-trade.MaxPrice + trade.OpenPrice) : (trade.MinPrice - trade.OpenPrice)" :maxRange="(trade.Direction ? (-trade.MinPrice + trade.OpenPrice) : (trade.MaxPrice - trade.OpenPrice))"/>
                         <!-- <div class="">{{formatNumber(trade.ClosePrice)}}</div> -->
@@ -83,8 +83,8 @@
 </template>
 
 <script>
-import { trades, selectedMkt } from '../stateJournal';
-import { formatCurrency, formatTime, timeDiff,formatNumber } from '../utils';
+import { trades, selectedMkt, loadTrade } from '../stateJournal';
+import { formatCurrency, formatTime, timeDiff,formatNumber, getUTC } from '../utils';
 import ProgressBar from './ProgressBar.vue';
 import Triangle from './Icons/Triangle.vue';
 export default {
@@ -107,6 +107,12 @@ export default {
             }
             return (score * 100)
         }
+
+        const loadTradeHandler = (trade) => {
+
+            loadTrade(trade)
+        }
+
         return {
             trades,
             formatCurrency,
@@ -116,7 +122,8 @@ export default {
             ProgressBar,
             timeDiff,
             Triangle,
-            getResultScore
+            getResultScore,
+            loadTradeHandler
         }
     }
     

@@ -56,10 +56,15 @@ const timeDiff = (t1, t2) => {
   return `${minutes}m ${seconds}s`; 
 }
 
+const getUTC = (iso) => {
+  return new Date(iso).getTime()
+}
+
 export {
     formatCurrency,
     formatDate,
     formatTime,
     timeDiff,
-    formatNumber
+    formatNumber,
+    getUTC
 }

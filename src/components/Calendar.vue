@@ -1,13 +1,13 @@
 <template>
     <div class="py-1 px-4 h-full w-[50rem]">
       <!-- Calendar Header -->
-      <div class="flex justify-between items-center mb-1 bg-slate-200">
+      <div class="flex justify-between items-center mb-1 bg-slate-100">
 
-        <button @click="prevMonth" class=" font-bold px-3 py-1 bg-slate-300 hover:bg-slate-400 hover:text-white rounded-full ml-2 text-slate-500"><ChevronL/></button>
+        <button @click="prevMonth" class=" font-bold px-3 py-1 bg-slate-200 hover:bg-slate-300 hover:text-white rounded-full ml-2 text-slate-500"><ChevronL/></button>
         <h2 class="text-sm font-bold uppercase rounded px-2 py-1 hover:bg-slate-300 hover:text-white cursor-pointer " @click="hideCalendar">
           {{ monthNames[currentMonth] }} {{ currentYear }}
         </h2>
-        <button @click="nextMonth" class="px-3 py-1 rounded bg-slate-300 hover:bg-slate-400 hover:text-white rounded-full mr-2  text-slate-500"><ChevronR/></button>
+        <button @click="nextMonth" class="px-3 py-1 rounded bg-slate-200 hover:bg-slate-300 hover:text-white rounded-full mr-2  text-slate-500"><ChevronR/></button>
 
       </div>
   

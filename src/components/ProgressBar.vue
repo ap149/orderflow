@@ -1,6 +1,6 @@
 <template>
-    <div class="flex  border border-slate-300"
-         :class="size == 'medium' ? 'h-3' : 'h-1'"   
+    <div class="flex  border border-slate-300 bg-white"
+         :class="size == 'medium' ? 'h-3' : size=='large' ? 'h-6' : 'h-1'"    
     >
       <!-- LHS Div -->
       <div

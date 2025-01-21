@@ -34,7 +34,7 @@
       class="w-96 border-t border-t-slate-300 border-l border-l-slate-500 border-r border-r-slate-500 flex flex-row ml- mr-"
     >
       <div
-        class="text-center w-24 cursor-pointer border-l border-l-slate-500 ml- border-r border-r-slate-500"
+        class="text-center w-24 cursor-pointer ml- border-r border-r-white"
         :class="
           getTotalVolumeColor(
             rowItem['from'][rowItem['from'].length - 1]['total_volume']
@@ -44,7 +44,7 @@
         {{ rowItem["from"][rowItem["from"].length - 1]["total_volume"] }}
       </div>
       <div
-        class="text-center w-28 leading-relaxed cursor-pointer font-bold"
+        class="text-center w-24 leading-relaxed cursor-pointer font-bold"
         :class="getTotalDeltaColor(rowItem['from'].slice(-1)[0]['delta'])"
       >
         {{ rowItem["from"].slice(-1)[0]["delta"] }}
@@ -101,13 +101,13 @@
         }}
       </div>
       <div
-        class="text-center w-28 leading-relaxed cursor-pointer font-bold"
+        class="text-center w-24 leading-relaxed cursor-pointer font-bold"
         :class="getTotalDeltaColor(rowItem['to'][0]['delta'])"
       >
         {{ rowItem["to"][0]["delta"] }}
       </div>
       <div
-        class="text-center w-24 cursor-pointer border-r border-r-slate-500 border-l border-l-slate-500 ml-"
+        class="text-center w-24 cursor-pointer  border-l border-lwhite ml-"
         :class="getTotalVolumeColor(rowItem['to'][0]['total_volume'])"
       >
         {{ rowItem["to"][0]["total_volume"] }}

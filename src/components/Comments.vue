@@ -1,9 +1,21 @@
 <template lang="">
-    <div class="select-none">
-        <div v-for="comment in comments" :key="comment.timestamp" class="bg-slate-100 m-2 mx-2 py-1 pl-2 pr-8 text-xs rounded-md relative">
-            <div class="text-slate-400 text-xxs">{{formatTime(comment.timestamp) }}</div>
-            <div>{{ comment.comment }}</div>
-            <Trash class="absolute right-2 top-2" :commentKey="comment.timestamp"/>
+    <div class="select- pb-2 bg-white">
+        <div v-for="comment in comments" :key="comment.timestamp" class=" flex mt-2 ml-2 mr-2 flex justify-between">
+          <div class="text-xs rounded-md relative bg-slate-100 pl-2 pr-2 py-1 flex items-center justify-between">
+            <div>
+              <div class="flex items-start">
+                <div class="text-slate-400 text-xxs w-12">{{formatTime(comment.timestamp) }}</div>
+                <EditIcon class="mt- pr-  text-slate-400 cursor-pointer"/>
+              </div>
+              <div class="pr-4">{{ comment.comment }}</div>
+            </div>
+            <Trash class="" :commentKey="comment.timestamp"/>
+          </div>
+          <div class="w- text-xxs flex   items-center justify-end">
+          <div class="w-8 p-2 rounded-full mx-1 " :class="getCommentTypeStyle('comment', comment)" @click="handleChangeCommentType('comment', comment)"><ChatIcon/></div>
+          <div class="w-8 p-2 rounded-full      " :class="getCommentTypeStyle('level', comment)"   @click="handleChangeCommentType('level', comment)"><LevelsIcon/></div>
+          <!-- <div class="w-8">L</div> -->
+          </div>
         </div>
         <!-- <div class="text-xxs text-white">gap</div> -->
     </div>
@@ -15,8 +27,13 @@ import { formatTime } from '../utils';
 import { getDatabase, ref as dbRef, query, orderByChild, startAt, endAt, onChildAdded, orderByKey, get, onValue } from 'firebase/database';
 import { database } from "../firebase";
 import Trash from "./Icons/Trash.vue"
+import ChartIcon from './Icons/ChartIcon.vue';
+import ChatIcon from './Icons/ChatIcon.vue';
+import LevelsIcon from './Icons/LevelsIcon.vue';
+import EditIcon from "./Icons/EditIcon.vue"
+import { changeCommentType } from '../stateJournal';
 export default {
-  components: {Trash},
+  components: {Trash, ChartIcon, ChatIcon, LevelsIcon, EditIcon},
   // emits:['scroll-to-bottom'],
    setup(_, {emit}) {
 
@@ -40,27 +57,27 @@ export default {
             );
             console.log("Comments being fetched:", todayStartStr, todayEndStr);
             const res = onValue(commentsQuery, (snapshot) => {
-              // console.log(snapshot)
                 const newComments = snapshot.val();
                 if (newComments) {
                   console.log("new comment")
                   emit('scroll-to-bottom')
                   comments.value = Object.values(newComments);
                 }
-            });            
-            // try {
-            //     console.log("Fetching comments", todayStartStr, todayEndStr);
-            //     const snapshot = await get(commentsQuery);
-            //     if (snapshot.exists()) {
-            //         comments.value = Object.values(snapshot.val()); // Reverse to show latest at the top
-            //     } else {
-            //         console.log("No comments found for the selected date.");
-            //         comments.value = [];
-            //     }
-            // } catch (error) {
-            //     console.error("Error fetching comments:", error);
-            // }            
+            });                  
         }
+    const getCommentTypeStyle = (str, comment) => {
+      if (str == comment.type) {
+        return "text-teal-300"
+      } else {
+        return "cursor-pointer text-slate-200 hover:bg-slate-100 hover:text-slate-300"
+      }
+    }
+
+    const handleChangeCommentType = (str, comment) => {
+      if (str == comment.type) return
+      // console.log(`changing comment ${comment.timestamp} from ${comment.type} t ${str}`)
+      changeCommentType(str, comment.timestamp)
+    }
     onMounted(() => {
       // Set up the listener for child added
       fetchComments()
@@ -71,7 +88,13 @@ export default {
     return {
         comments,
         formatTime,
-        Trash
+        Trash,
+        ChartIcon,
+        ChatIcon,
+        LevelsIcon,
+        EditIcon,
+        getCommentTypeStyle,
+        handleChangeCommentType
     }
   }
 }

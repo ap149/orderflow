@@ -1,7 +1,7 @@
 <template>
-  <div class="bg-slate-10 relative ">
+  <div class="bg-slate-200 relative ">
     <div class="flex h-screen w-screen z-10">
-      <div class="bg-slate-200 shadow flex flex-col  absolute right-0 top-12 w-72 bottom-0 px-10 py-6">
+      <div class="bg-slate-200 flex flex-col  absolute right-0 top-12 w-80 bottom-0 pr-10 py-6">
         <div class="bg-slate-80 py- flex text-xs justify-between">
           <div @click="handleChangeMarket('DAX')" class="text-white rounded p-1 font-bold w-14 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'DAX' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">DAX</div>
           <div @click="handleChangeMarket('ES')" class="text-white rounded p-1 font-bold w-14 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'ES' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">ES</div>
@@ -55,7 +55,7 @@
         </div>
 
 
-        <div class="bg-slate-80">
+        <div class="bg-slate-80 w-">
           <div class="uppercase text-xs font-bold mt-8 mb-4 text-slate-500">Display params</div>          
           <div class="flex flex-col">
             <div class="flex flex-row mb-2 justify-between text-xs">
@@ -82,6 +82,22 @@
                 v-model="options.maxTotal"
               />
             </div>
+            <div class="flex flex-row mb-2 justify-between text-xs">
+              <div class="mr-2">Max Cum. Delta:</div>
+              <input
+                type="text"
+                class="px-2 min-w-12 max-w-12  text-xs"
+                v-model="options.maxCumDelta"
+              />
+            </div>
+            <div class="flex flex-row mb-2 justify-between text-xs">
+              <div class="mr-2">Max Cum. Delta Net:</div>
+              <input
+                type="text"
+                class="px-2 min-w-12 max-w-12  text-xs"
+                v-model="options.maxCumDeltaNet"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -89,8 +105,8 @@
       <div
         class="fixed left-0 w-80 top-12 bottom-0 flex flex-col"
       >
-        <TimePriceVol />
-        <div class="overflow-y-scroll h-96 " ref="scrollContainer" >
+        <TimePriceVol class="bg-white"/>
+        <div class="overflow-y-scroll h-96 bg-white" ref="scrollContainer" >
           <div class="sticky top-0 bg-slate-200 text-xxs py-1 pl-1 font-bold uppercase border-t border-t-slate-300 z-50 shadow-lg">Comments</div>
           <Comments class="z-10 " @scroll-to-bottom="scrollToBottom"/>
         </div>
@@ -151,9 +167,9 @@ export default {
         await nextTick()
         console.log("scrolling to bottom - container")
         console.log("Container dimensions:");
-console.log("scrollHeight:", scrollContainer.value.scrollHeight); // Total content height
-console.log("offsetHeight:", scrollContainer.value.offsetHeight); // Visible height
-console.log("scrollTop:", scrollContainer.value.scrollTop); // Curren        
+        console.log("scrollHeight:", scrollContainer.value.scrollHeight); // Total content height
+        console.log("offsetHeight:", scrollContainer.value.offsetHeight); // Visible height
+        console.log("scrollTop:", scrollContainer.value.scrollTop); // Curren        
         console.log(scrollContainer.value.scrollHeight, scrollContainer.value.scrollTop )
         scrollContainer.value.scrollTop = scrollContainer.value.scrollHeight// - scrollContainer.value.offsetHeight + 100;
         console.log(scrollContainer.value.scrollHeight, scrollContainer.value.scrollTop )

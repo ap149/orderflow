@@ -1,4 +1,4 @@
-import { reactive } from "@vue/reactivity";
+import { reactive, ref as vueRef } from "@vue/reactivity";
 import { database } from "./firebase";
 import { ref, onChildAdded, off } from "firebase/database";
 import router from './router';
@@ -10,13 +10,15 @@ const marketParams = {
     maxVolume: 200,
     maxTotal: 100,
     maxCell: 20,
+    maxCumDelta: 200,
+    maxCumDeltaNet: 200,
     stop: 7,
     limit: 15,
     size: 10,
     hours: 8,
     mins: 0,
     spread: 1,
-    high: 21000,
+    high: 22000,
     low: 20500,
     step: 0.1,
     max_chg: 10
@@ -58,24 +60,54 @@ const createLadder = (market) => {
   const { low, high, step } = marketParams[market];
   for (let price = high; price >= low; price -= step) {
     priceObject[price.toFixed(2)] = {
-      from: Array(12).fill({}),
-      to: Array(12).fill({}),
+      from: Array(9).fill({}),
+      to: Array(9).fill({}),
       filled: false,
     };
   }
   console.log("Ladder created for", market);
-  console.log(priceObject)
   return priceObject;
 };
 // Reactive data
+const clearDelta = () => {
+  return {
+    "from": {
+      "max": -10000,
+      "min": 10000,
+      "current": 0
+    },
+    "to": {
+      "max":-10000,
+      "min": 10000,
+      "current": 0
+    }
+  }
+}
+let deltaLadderFrom = reactive({data:[]})
+let deltaLadderTo = reactive({data:[]})
+let delta = reactive(clearDelta())
+const resetDelta = () => {
+  const cleared = clearDelta();
+  // Update each property manually to retain reactivity
+  delta.from.max = cleared.from.max;
+  delta.from.min = cleared.from.min;
+  delta.from.current = cleared.from.current;
+
+  delta.to.max = cleared.to.max;
+  delta.to.min = cleared.to.min;
+  delta.to.current = cleared.to.current;
+};
 let ladder = reactive(createLadder(selectedMarket.selectedMarket));
 let prices = reactive([]);
 let tpv = reactive([]);
 let utc = reactive({ utc: 0 });
+let calcCumDelta = vueRef(false)
 const options = reactive({
   maxVolume: 30,
   maxTotal: 30,
   maxCell: 30,
+  maxCumDelta: 30,
+  maxCumDeltaNet: 30,
   minOpacity: 0.0,
   maxOpacity: 1.0,
   sessionStart: 0,
@@ -123,6 +155,8 @@ const initOptions = () => {
   options.maxVolume = marketParams[selectedMarket.selectedMarket].maxVolume;
   options.maxTotal = marketParams[selectedMarket.selectedMarket].maxTotal;
   options.maxCell = marketParams[selectedMarket.selectedMarket].maxCell;
+  options.maxCumDelta = marketParams[selectedMarket.selectedMarket].maxCumDelta;
+  options.maxCumDeltaNet = marketParams[selectedMarket.selectedMarket].maxCumDeltaNet;
   options.max_chg = marketParams[selectedMarket.selectedMarket].max_chg;
 
   intervals.unshift(options.sessionStart);
@@ -130,6 +164,56 @@ const initOptions = () => {
   // Reload data for the new market
   loadData();
 };
+
+const calculateCumDelta = (fromPx, toPx, data) => {
+  const prices = Object.keys(data).map(String); // Get prices as numbers
+  const resultFrom = {};
+  const resultTo = {};
+  // Sort prices in descending order
+  prices.sort((a, b) => b - a);
+
+  let cumFromDelta = 0;
+  let cumToDelta = 0;
+  // For prices above or equal to the input price
+  for (const price of prices) {
+    if (price == toPx) {
+      resultFrom[price] = 0
+      resultTo[price] = 0
+    }
+    if (price > toPx) {
+      // console.log(data[price])
+      if (!data[price].filled) continue
+      cumFromDelta += data[price].from.at(-1).delta;
+      cumToDelta += data[price].to.at(0).delta;
+      // console.log(cumDelta)
+      resultFrom[price] = { cum_delta: cumFromDelta };
+      resultTo[price] = { cum_delta: cumToDelta };
+    } else {
+      break; // Stop when we pass below the fromPx
+    }
+  }
+  
+  cumFromDelta = 0;
+  cumToDelta = 0;
+  
+  // For prices below the input price
+  for (let i = prices.length - 1; i >= 0; i--) {
+    const price = prices[i];
+    if (price < toPx) {
+      if (!data[price].filled) continue
+      cumFromDelta += data[price].from.at(-1).delta;
+      cumToDelta += data[price].to.at(0).delta;
+      resultFrom[price] = { cum_delta: cumFromDelta };
+      resultTo[price] = { cum_delta: cumToDelta };
+    } else {
+      break; // Stop when we pass above the inputPrice
+    }
+  }
+  // console.log(result)
+  deltaLadderFrom.data = resultFrom
+  deltaLadderTo.data = resultTo
+  // return result;
+}
 
 
 const loadData = () => {
@@ -139,7 +223,7 @@ const loadData = () => {
     console.log("Detaching previous listener...");
     off(currentListenerRef);
   }
-
+  resetDelta()
   // Reset the ladder object while preserving reactivity
   const newLadder = createLadder(selectedMarket.selectedMarket);
   for (const key in ladder) {
@@ -159,10 +243,12 @@ const loadData = () => {
 
   // Attach a new listener
   console.log("Loading data for market:", selectedMarket.selectedMarket);
-  const dbRef = ref(database, selectedMarket.selectedMarket.toLowerCase());
+  const dbRef = ref(database, `priceFeed/${selectedMarket.selectedMarket.toLowerCase()}`);
   currentListenerRef = dbRef;
-
+  let inputPx = 0
+  let debounceTimeout = null;
   onChildAdded(dbRef, (snapshot) => {
+    calcCumDelta.value = false
     const item = snapshot.val();
     const fromPx = roundPx(item.from.price, marketParams[selectedMarket.selectedMarket].step, true);
     const toPx = roundPx(item.to.price, marketParams[selectedMarket.selectedMarket].step, true);
@@ -192,9 +278,26 @@ const loadData = () => {
     updateIntervals(item.to.utc);
     tpv.unshift(item);
     if (tpv.length > 200) tpv.pop();
+    const cumulativeFromDelta = delta.from.current + Math.round(item.from.delta)
+    delta.from.max = Math.max(delta.from.max, cumulativeFromDelta)
+    delta.from.min = Math.min(delta.from.min, cumulativeFromDelta)
+    delta.from.current = cumulativeFromDelta
+    const cumulativeToDelta = delta.to.current + Math.round(item.to.delta)
+    delta.to.max = Math.max(delta.to.max, cumulativeToDelta)
+    delta.to.min = Math.min(delta.to.min, cumulativeToDelta)
+    delta.to.current = cumulativeToDelta
+    // calculateCumDelta(fromPx, toPx,ladder)
+    clearTimeout(debounceTimeout);    
+    debounceTimeout = setTimeout(() => {
+      // Run your callback after 250ms of inactivity
+      calcCumDelta.value = true;
+      console.log("Called after 250ms of no new children");
+      calculateCumDelta(fromPx, toPx,ladder)
+      // Optionally, invoke your calculation here
+      // calculateCumDelta(fromPx, toPx, ladder);
+    }, 150); // 250ms delay
+    // console.log("next...")
   });
-
-  console.log("Data loaded for market:", selectedMarket.selectedMarket);
 };
 
 
@@ -230,8 +333,11 @@ export {
   changeMarket,
   prices,
   ladder,
+  deltaLadderFrom,
+  deltaLadderTo,
   utc,
   options,
   intervals,
-  tpv, selectedCell, changeSelectedCell
+  tpv, selectedCell, changeSelectedCell,
+  delta
 };
