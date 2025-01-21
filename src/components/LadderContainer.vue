@@ -20,7 +20,7 @@
         <div class="">
           <div v-for="(item, index) in ladder" :key="index" class="">
             <div v-if="item['filled']" class="h-4  text-center border-l border-l-white border-r border-r-white">
-              <div class="border-b border-b-white border-t border-t-white w-10 px-2" :class="getCumDeltaColor(getCumDelta(item, false) + getCumDelta(item, true))">{{ getCumDelta(item, true)}}</div>
+              <div class="border-b border-b-white border-t border-t-white w-10 px-2" :class="getCumDeltaColor(getCumDelta(item, false) + getCumDelta(item, true))">{{ getCumDelta(item, true) + getCumDelta(item, false)}}</div>
             </div>
           </div>      
         </div>

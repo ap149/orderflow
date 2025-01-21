@@ -295,7 +295,7 @@ const loadData = () => {
       calculateCumDelta(fromPx, toPx,ladder)
       // Optionally, invoke your calculation here
       // calculateCumDelta(fromPx, toPx, ladder);
-    }, 150); // 250ms delay
+    }, 100); // 250ms delay
     // console.log("next...")
   });
 };
