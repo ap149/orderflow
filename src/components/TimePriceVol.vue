@@ -1,12 +1,12 @@
 <template>
-  <div class=" overflow-y-scroll h-1/2">
+  <div class=" overflow-y-scroll h-full">
     <div
       class="text-xxs border-b border-b-slate-200 border-t border-t-slate-200 flex flex-row"
       v-for="(item, index) in tpv"
       :key="index"
     >
       <div
-        class="w-16 text-slate-400 px-2 border-r border-r-slate-300 border-l border-l-slate-300 bg-slate-100"
+        class="w-14 text-slate-500 px-2 border-r border-r-slate-300 border-l border-l-slate-300 bg-slate-50"
       >
         {{ formatTime(item["from"]["utc"]) }}
       </div>
@@ -16,14 +16,8 @@
       >
         {{ item["from"]["delta"] }}
       </div> -->
-      <div class="w-16 text-center border-r-2 border-r-slate-300 bg-white">
+      <div class="w-14 text-center border-r-2 border-r-slate-300 bg-white">
         {{ (item["from"]["price"]+parseFloat(options.adj)).toFixed(2) }}
-      </div>
-      <div
-        class="w-12 text-center font-bold"
-        :class="getPxChgColor(item['from']['chg'])"
-      >
-        {{ item["from"]["chg"].toFixed(2) }}
       </div>
       <div
         class="w-12 text-center font-bold"
@@ -31,7 +25,13 @@
       >
         {{ item["from"]["volume"] * (item["from"]["chg"] < 0 ? -1 : 1) }}
       </div>
-      <div class="w-16 text-center border-l-2 border-l-slate-300 bg-white">
+      <div
+        class="w-12 text-center font-bold"
+        :class="getPxChgColor(item['from']['chg'])"
+      >
+        {{ item["from"]["chg"].toFixed(2) }}
+      </div>
+      <div class="w-14 text-center border-l-2 border-l-slate-300 bg-white">
         {{ (item["to"]["price"] + parseFloat(options.adj)).toFixed(2) }}
       </div>
       <!-- <div

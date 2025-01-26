@@ -31,21 +31,26 @@
     </div>
 
     <div
-      class="border-l border-l-slate-500 border-r border-r-slate-500 flex flex-row ml- mr- items-center"
+      class="w-96 border-t border-t-slate-300 border-l border-l-slate-500 border-r border-r-slate-500 flex flex-row ml- mr-"
     >
       <div
-        class="text-center w-32 cursor-pointer ml- border-r border-r-white"
+        class="text-center w-24 cursor-pointer ml- border-r border-r-white"
+        :class="
+          getTotalVolumeColor(
+            rowItem['from'][rowItem['from'].length - 1]['total_volume']
+          )
+        "
       >
-        <ProgressBar :value="rowItem['from'].slice(-1)[0]['total_volume']" :minRange="0" :maxRange="options.maxVolume" :neutral="true" />
+        {{ rowItem["from"][rowItem["from"].length - 1]["total_volume"] }}
       </div>
       <div
-        class="text-center w-32 cursor-pointer ml- border-r border-r-white"
+        class="text-center w-24 leading-relaxed cursor-pointer font-bold"
+        :class="getTotalDeltaColor(rowItem['from'].slice(-1)[0]['delta'])"
       >
-        <ProgressBar :value="rowItem['from'].slice(-1)[0]['delta']" :minRange="-options.maxTotal" :maxRange="options.maxTotal" />
+        {{ rowItem["from"].slice(-1)[0]["delta"] }}
       </div>
       <div
-        class="px-1 text-slate-500 text-center leading-relaxed cursor-pointer hover:bg-rose-400 hover:text-white w-16"
-        :class="getVWAPClass(px)"
+        class="px-1 text-slate-500 text-center leading-relaxed cursor-pointer hover:bg-rose-400 hover:text-white w-24"
         @mousedown="
           handleMouseDown(
             $event,
@@ -68,14 +73,13 @@
       </div>
 
       <div
-        class="px-2 font-bold text-center leading-relaxed cursor-pointer w-16"
+        class="px-2 font-bold text-center leading-relaxed cursor-pointer w-24"
         :class="rowItem['filled'] == 2 ? 'bg-slate-700 text-white' : ''"
       >
         {{ (parseFloat(px) + parseFloat(options.adj)).toFixed(2) }}
       </div>
       <div
-        class="px-1 text-slate-500 text-center leading-relaxed cursor-pointer hover:bg-teal-400 hover:text-white w-16"
-        :class="getVWAPClass(px, false)"
+        class="px-1 text-slate-500 text-center leading-relaxed cursor-pointer hover:bg-teal-400 hover:text-white w-24"
         @mousedown="
           handleMouseDown(
             $event,
@@ -97,14 +101,16 @@
         }}
       </div>
       <div
-        class="text-center w-32 cursor-pointer ml- border-r border-r-white"
+        class="text-center w-24 leading-relaxed cursor-pointer font-bold"
+        :class="getTotalDeltaColor(rowItem['to'][0]['delta'])"
       >
-        <ProgressBar :value="rowItem['to'][0]['delta']" :minRange="-options.maxTotal" :maxRange="options.maxTotal" />
+        {{ rowItem["to"][0]["delta"] }}
       </div>
       <div
-        class="text-center w-32 cursor-pointer ml- border-r border-r-white"
+        class="text-center w-24 cursor-pointer  border-l border-lwhite ml-"
+        :class="getTotalVolumeColor(rowItem['to'][0]['total_volume'])"
       >
-        <ProgressBar :value="rowItem['to'][0]['total_volume']" :minRange="0" :maxRange="options.maxVolume"  :reverse="true" :neutral="true"/>
+        {{ rowItem["to"][0]["total_volume"] }}
       </div>
     </div>
 
@@ -148,14 +154,10 @@ import {
   intervals,
   selectedCell,
   changeSelectedCell,
-  fromVWAP,
-  toVWAP
 } from "../stateOrderflow";
 import { placeOrder } from "../execution";
 import { reactive, ref } from "vue";
-import ProgressBar from "./ProgressBar.vue";
 export default {
-  components: {ProgressBar},
   props: {
     // Props definition is here
     rowItem: {
@@ -169,43 +171,27 @@ export default {
     const minOpacity = 0;
     const px = ref(props.rowItem["to"][0]["price"]);
 
-    const getVWAPClass = (px, from=true) => {
-      const step = options.step
-      const vwap = from ? Math.round(fromVWAP.value/options.step)*options.step : Math.round(toVWAP.value/options.step)*options.step
-      const adjPx = (parseFloat(px) + parseFloat(options.adj))
-      const classStr0 = 'bg-amber-400 text-white'
-      const classStr1 = 'bg-amber-300 text-white'
-      const classStr2 = 'bg-amber-200 '
-      if (vwap == adjPx) {
-        console.log("exact vwap")
-        return classStr0
-      }
-      if (vwap <= adjPx + step && vwap >= adjPx - step) {
-        console.log("1step vwap")
-        return classStr1
-      }
-      if (vwap <= adjPx + step*2 && vwap >= adjPx - step*2) {
-        console.log("2step vwap")
-        return classStr2
-      }
-      return ''
-    }
-
+    // const priceColor = (price) => {
+    //   // return "bg-slate-200 text-black";
+    //   if (price == value_[0]) return "bg-slate-900 text-white   ";
+    //   if (price == value_[1]) return "bg-slate-600 text-white ";
+    //   if (price == value_[2]) return "bg-slate-400 text-white ";
+    //   if (price == value_[3]) return "bg-slate-300 text-black ";
+    //   if (price == value_[4]) return "bg-slate-200 text-black ";
+    //   // if (price == value_[5])
+    //   //   return "bg-slate-300 text-black ";
+    //   // if (price == value_[6])
+    //   //   return "bg-slate-200 text-black ";
+    //   // if (price == value_[7])
+    //   //   return "bg-slate-100 text-black ";
+    //   return "bg-slate-50 text-black ";
+    // };
     const handleMouseDown = (event, px, dir) => {
       console.log("Cell value_:", px);
-      console.log("rounded: ", Math.round(fromVWAP.value/options.step)*options.step);
-      const step = options.step
-      const vwap = Math.round(fromVWAP.value/options.step)*options.step - options.spread/2
-      const adjPx = (parseFloat(px) + parseFloat(options.adj))
-      const classStr = 'bg-amber-400 text-white'
-      console.log(step)
-      console.log(vwap)
-      console.log(adjPx)
-      console.log(adjPx == vwap)
-      // if (vwap == adjPx) classStr
-      // if (vwap <= adjPx + step || vwap >= adjPx - step) classStr
-      // if (vwap <= adjPx + step*2 || vwap >= adjPx - step*2) classStr
-      // return ''      
+      // console.log(intervals.value_[0].value_["time"]);
+      // console.log(totals.value_);
+      // console.log("handlee: ", px, dir);
+      placeOrder(px, dir);
     };
     const getTotalVolumeColor = (vol) => {
       const opacity =
@@ -316,10 +302,6 @@ export default {
       px,
       handleMouseDown,
       clickCell,
-      ProgressBar,
-      fromVWAP,
-      toVWAP,
-      getVWAPClass
     };
   },
 };

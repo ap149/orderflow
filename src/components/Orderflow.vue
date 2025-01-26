@@ -1,11 +1,11 @@
 <template>
   <div class="bg-slate-200 relative ">
     <div class="flex h-screen w-screen z-10">
-      <div class="bg-slate-200 flex flex-col  absolute right-0 top-12 w-80 bottom-0 pr-10 py-6">
+      <div class="bg-slate-200 flex flex-col  absolute right-0 top-12 w-[18rem] bottom-0 pr-10 pl-8 pt-8 ">
         <div class="bg-slate-80 py- flex text-xs justify-between">
-          <div @click="handleChangeMarket('DAX')" class="text-white rounded p-1 font-bold w-14 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'DAX' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">DAX</div>
-          <div @click="handleChangeMarket('ES')" class="text-white rounded p-1 font-bold w-14 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'ES' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">ES</div>
-          <div @click="handleChangeMarket('NQ')" class="text-white rounded p-1 font-bold w-14 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'NQ' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">NQ</div>
+          <div @click="handleChangeMarket('DAX')" class="text-white rounded p-1 font-bold w-20 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'DAX' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">DAX</div>
+          <div @click="handleChangeMarket('ES')" class="text-white rounded p-1 font-bold w-20 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'ES' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">ES</div>
+          <!-- <div @click="handleChangeMarket('NQ')" class="text-white rounded p-1 font-bold w-14 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'NQ' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">NQ</div> -->
           <!-- <div @click="handleChangeMarket('NAS')" class="text-white rounded p-1 font-bold w-16 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'NAS' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">ES</div> -->
         </div>
         <div class="bg-slate-80 mt-8">
@@ -15,7 +15,7 @@
               <div class="mr-2">Size:</div>
               <input
                 type="text"
-                class="px-2 min-w-12 max-w-12 text-xs"
+                class="px-2 min-w-16 max-w-16 text-xs"
                 v-model="options.size"
               />
             </div>
@@ -23,7 +23,7 @@
               <div class="mr-2">SL:</div>
               <input
                 type="text"
-                class="px-2 min-w-12 max-w-12 text-xs"
+                class="px-2 min-w-16 max-w-16 text-xs"
                 v-model="options.stop"
               />
             </div>
@@ -31,7 +31,7 @@
               <div class="mr-2">TP:</div>
               <input
                 type="text"
-                class="px-2 min-w-12 max-w-12 text-xs"
+                class="px-2 min-w-16 max-w-16 text-xs"
                 v-model="options.limit"
               />
             </div>
@@ -39,7 +39,7 @@
               <div class="mr-2">Spread:</div>
               <input
                 type="text"
-                class="px-2 min-w-12 max-w-12 text-xs"
+                class="px-2 min-w-16 max-w-16 text-xs"
                 v-model="options.spread"
               />
             </div>
@@ -47,7 +47,7 @@
               <div class="mr-2">Adj:</div>
               <input
                 type="text"
-                class="px-2 min-w-12 max-w-12 text-xs"
+                class="px-2 min-w-16 max-w-16 text-xs"
                 v-model="options.adj"
               />
             </div>
@@ -62,7 +62,7 @@
               <div class="mr-2">Max Cell:</div>
               <input
                 type="text"
-                class="px-2 min-w-12 max-w-12  text-xs"
+                class="px-2 min-w-16 max-w-16  text-xs"
                 v-model="options.maxCell"
               />
             </div>
@@ -70,7 +70,7 @@
               <div class="mr-2">Max Volume:</div>
               <input
                 type="text"
-                class="px-2 min-w-12 max-w-12  text-xs"
+                class="px-2 min-w-16 max-w-16  text-xs"
                 v-model="options.maxVolume"
               />
             </div>
@@ -78,7 +78,7 @@
               <div class="mr-2">Max Delta:</div>
               <input
                 type="text"
-                class="px-2 min-w-12 max-w-12  text-xs"
+                class="px-2 min-w-16 max-w-16  text-xs"
                 v-model="options.maxTotal"
               />
             </div>
@@ -86,7 +86,7 @@
               <div class="mr-2">Max Cum. Delta:</div>
               <input
                 type="text"
-                class="px-2 min-w-12 max-w-12  text-xs"
+                class="px-2 min-w-16 max-w-16  text-xs"
                 v-model="options.maxCumDelta"
               />
             </div>
@@ -94,7 +94,7 @@
               <div class="mr-2">Max Cum. Delta Net:</div>
               <input
                 type="text"
-                class="px-2 min-w-12 max-w-12  text-xs"
+                class="px-2 min-w-16 max-w-16  text-xs"
                 v-model="options.maxCumDeltaNet"
               />
             </div>
@@ -103,14 +103,14 @@
       </div>
       <LadderContainer />
       <div
-        class="fixed left-0 w-80 top-12 bottom-0 flex flex-col"
+        class="fixed left-0 w-[18rem] top-12 bottom-0 flex flex-col"
       >
         <TimePriceVol class="bg-white"/>
-        <div class="overflow-y-scroll h-96 bg-white" ref="scrollContainer" >
+        <!-- <div class="overflow-y-scroll h-96 bg-white" ref="scrollContainer" >
           <div class="sticky top-0 bg-slate-200 text-xxs py-1 pl-1 font-bold uppercase border-t border-t-slate-300 z-50 shadow-lg">Comments</div>
           <Comments class="z-10 " @scroll-to-bottom="scrollToBottom"/>
         </div>
-        <EnterComment/>
+        <EnterComment/> -->
       </div>
       <CellDetail
         v-if="selectedCell.selectedCell"

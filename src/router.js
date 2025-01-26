@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Orderflow from './components/Orderflow.vue';
 import Journal from './components/Journal.vue';
-
+import Delta from './components/Delta.vue';
 const routes = [
     {
         path: '/',
@@ -17,6 +17,11 @@ const routes = [
         path: '/journal',
         name: "Journal",
         component: Journal
+    },
+    {
+        path: '/delta',
+        name: "Delta",
+        component: Delta
     },
 ];
 

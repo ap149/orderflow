@@ -1,17 +1,18 @@
 <template>
     <div class="flex  border border-slate-300 bg-white"
-         :class="size == 'medium' ? 'h-3' : size=='large' ? 'h-6' : 'h-1'"    
+         :class="getContainerClass()"    
     >
       <!-- LHS Div -->
-      <div
-        :style="lhsStyle"
-        class="h-full  border-r border-r-slate-500"
-      ></div>
-      <!-- RHS Div -->
-      <div
-        :style="rhsStyle"
-        class="h-full "
-      ></div>
+
+         <div
+         :style="lhsStyle"
+         class="h-full  border-r border-r-slate-500"
+         ></div>
+         <!-- RHS Div -->
+         <div
+         :style="rhsStyle"
+         class="h-full "
+         ></div>
     </div>
   </template>
   
@@ -37,9 +38,20 @@
         required: false,
         default: "medium"
       },
+      neutral: {
+        type: Boolean,
+        required: false,
+        default: false
+      },
+      reverse: {
+        type: Boolean,
+        required: false,
+        default: false
+      }
     },
     setup(props) {
       // Calculate the width proportions
+      const neutralColor = "#CBD5E1"
       const totalRange = computed(() => Math.abs(props.maxRange - props.minRange));
       const lhsWidth = computed(() =>
         Math.abs(props.minRange) / totalRange.value
@@ -57,15 +69,24 @@
       });
   
       const rhsStyle = computed(() => {
-        let color = "white" //#F0FDFA
+        let bg = "white" //#F0FDFA
+        let color = props.neutral ? neutralColor : "#2DD4BF" //#F0FDFA
         if (props.value > 0) {
           const proportion = Math.abs(props.value / props.maxRange);
-          return `width: ${rhsWidth.value * 100}%; background: linear-gradient(to right, #2DD4BF ${proportion * 100}%, ${color}  ${proportion * 100}%);`;
+          return `width: ${rhsWidth.value * 100}%; background: linear-gradient(to right, ${color}  ${proportion * 100}%, ${bg}  ${proportion * 100}%);`;
         }
-        return `width: ${rhsWidth.value * 100}%; background: ${color} ;`;
+        return `width: ${rhsWidth.value * 100}%; background: ${bg} ;`;
       });
-  
-      return { lhsStyle, rhsStyle };
+      const getContainerClass = () => {
+        let height = props.size == 'medium' ? 'h-3' : props.size=='large' ? 'h-6' : 'h-1'
+        let rotate = props.reverse ? 'rotate-180' : ''
+        return `${height} ${rotate}`
+      }
+      return { 
+        lhsStyle, 
+        rhsStyle,
+        getContainerClass
+      };
     },
   };
   </script>

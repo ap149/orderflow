@@ -3,7 +3,7 @@ import { database } from "./firebase";
 import { ref, onChildAdded, off } from "firebase/database";
 import router from './router';
 // Reactive states
-let selectedMarket = reactive({ selectedMarket: "DAX" });
+let selectedMarket = reactive({ selectedMarket: "ES" });
 
 const marketParams = {
   "DAX": {
@@ -18,22 +18,24 @@ const marketParams = {
     hours: 8,
     mins: 0,
     spread: 1,
-    high: 22000,
+    high: 23000,
     low: 20500,
     step: 0.1,
     max_chg: 10
   },
   "ES": {
-    maxVolume: 2000,
-    maxTotal: 1000,
+    maxVolume: 5000,
+    maxTotal: 2000,
     maxCell: 200,
+    maxCumDelta: 5000,
+    maxCumDeltaNet: 10000,
     stop: 2,
     limit: 5,
     size: 25,
     hours: 14,
     mins: 30,
     spread: 0.3,
-    high: 6150,
+    high: 6200,
     low: 5600,
     step: 0.25,
     max_chg: 2.0
@@ -48,8 +50,8 @@ const marketParams = {
     hours: 14,
     mins: 30,
     spread: 1.0,
-    high: 22000,
-    low: 20000,
+    high: 23000,
+    low: 21000,
     step: 0.25,
     max_chg: 10
   },
@@ -60,13 +62,20 @@ const createLadder = (market) => {
   const { low, high, step } = marketParams[market];
   for (let price = high; price >= low; price -= step) {
     priceObject[price.toFixed(2)] = {
-      from: Array(9).fill({}),
-      to: Array(9).fill({}),
+      from: Array(7).fill({}),
+      to: Array(7).fill({}),
       filled: false,
     };
   }
   console.log("Ladder created for", market);
+  console.log(console.log(priceObject));
   return priceObject;
+};
+
+const findPriceIndex = (pricesArr, price) => {
+  const keys = pricesArr; // Get all keys as an array
+  // return 10
+  return keys.indexOf(price.toFixed(2)); // Find the index of the price (as a string)
 };
 // Reactive data
 const clearDelta = () => {
@@ -83,6 +92,10 @@ const clearDelta = () => {
     }
   }
 }
+let fromVWAP = vueRef(0)
+let toVWAP = vueRef(0)
+let fromVWAPIndex = vueRef(0)
+let totalVolume = vueRef(0)
 let deltaLadderFrom = reactive({data:[]})
 let deltaLadderTo = reactive({data:[]})
 let delta = reactive(clearDelta())
@@ -116,7 +129,8 @@ const options = reactive({
   stop: 0,
   limit: 0,
   adj: 0.00,
-  max_chg: 0
+  max_chg: 0,
+  step: 0.1
 })
 let intervals = reactive([]);
 
@@ -158,6 +172,8 @@ const initOptions = () => {
   options.maxCumDelta = marketParams[selectedMarket.selectedMarket].maxCumDelta;
   options.maxCumDeltaNet = marketParams[selectedMarket.selectedMarket].maxCumDeltaNet;
   options.max_chg = marketParams[selectedMarket.selectedMarket].max_chg;
+  options.step = marketParams[selectedMarket.selectedMarket].step;
+
 
   intervals.unshift(options.sessionStart);
 
@@ -171,11 +187,48 @@ const calculateCumDelta = (fromPx, toPx, data) => {
   const resultTo = {};
   // Sort prices in descending order
   prices.sort((a, b) => b - a);
-
+  const toPxIndex = prices.indexOf(toPx);
   let cumFromDelta = 0;
   let cumToDelta = 0;
   // For prices above or equal to the input price
   for (const price of prices) {
+    if (price > toPx) continue
+    if (price == toPx) {
+      resultFrom[price] = 0
+      resultTo[price] = 0
+    }
+    if (price < toPx) {
+      // console.log(data[price])
+      if (!data[price].filled) continue
+      cumFromDelta += data[price].from.at(-1).delta;
+      cumToDelta += data[price].to.at(0).delta;
+      // console.log(cumDelta)
+      resultFrom[price] = { cum_delta: cumFromDelta };
+      resultTo[price] = { cum_delta: cumToDelta };
+    } 
+  }
+  for (const price of prices) {
+    if (price > toPx) continue
+    if (price == toPx) {
+      resultFrom[price] = 0
+      resultTo[price] = 0
+    }
+    if (price < toPx) {
+      // console.log(data[price])
+      if (!data[price].filled) continue
+      cumFromDelta += data[price].from.at(-1).delta;
+      cumToDelta += data[price].to.at(0).delta;
+      // console.log(cumDelta)
+      resultFrom[price] = { cum_delta: cumFromDelta };
+      resultTo[price] = { cum_delta: cumToDelta };
+    } 
+  }
+  
+  prices.sort((a, b) => a - b);
+  cumFromDelta = 0;
+  cumToDelta = 0;
+  for (const price of prices) {
+    if (price < toPx) continue
     if (price == toPx) {
       resultFrom[price] = 0
       resultTo[price] = 0
@@ -188,117 +241,119 @@ const calculateCumDelta = (fromPx, toPx, data) => {
       // console.log(cumDelta)
       resultFrom[price] = { cum_delta: cumFromDelta };
       resultTo[price] = { cum_delta: cumToDelta };
-    } else {
-      break; // Stop when we pass below the fromPx
-    }
+    } 
   }
   
-  cumFromDelta = 0;
-  cumToDelta = 0;
-  
-  // For prices below the input price
-  for (let i = prices.length - 1; i >= 0; i--) {
-    const price = prices[i];
-    if (price < toPx) {
-      if (!data[price].filled) continue
-      cumFromDelta += data[price].from.at(-1).delta;
-      cumToDelta += data[price].to.at(0).delta;
-      resultFrom[price] = { cum_delta: cumFromDelta };
-      resultTo[price] = { cum_delta: cumToDelta };
-    } else {
-      break; // Stop when we pass above the inputPrice
-    }
-  }
+  // // For prices below the input price
+  // for (let i = prices.length - 1; i >= 0; i--) {
+  //   const price = prices[i];
+  //   if (price < toPx) {
+  //     if (!data[price].filled) continue
+  //     cumFromDelta += data[price].from.at(-1).delta;
+  //     cumToDelta += data[price].to.at(0).delta;
+  //     resultFrom[price] = { cum_delta: cumFromDelta };
+  //     resultTo[price] = { cum_delta: cumToDelta };
+  //   } else {
+  //     break; // Stop when we pass above the inputPrice
+  //   }
+  // }
   // console.log(result)
   deltaLadderFrom.data = resultFrom
   deltaLadderTo.data = resultTo
   // return result;
 }
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-
-const loadData = () => {
+const loadData = async () => {
   // Detach the previous listener, if any
-  if (router.currentRoute.value.path != '/orderflow') return
+  if (router.currentRoute.value.path !== '/orderflow') return;
+
   if (currentListenerRef) {
     console.log("Detaching previous listener...");
     off(currentListenerRef);
   }
-  resetDelta()
+
+  resetDelta();
+  fromVWAP.value = 0
+  toVWAP.value = 0
+  totalVolume.value = 0
   // Reset the ladder object while preserving reactivity
   const newLadder = createLadder(selectedMarket.selectedMarket);
   for (const key in ladder) {
-    if (!newLadder[key]) {
-      // Remove keys that no longer exist in the new ladder
-      delete ladder[key];
-    }
+    if (!newLadder[key]) delete ladder[key]; // Remove keys that no longer exist
   }
   for (const key in newLadder) {
-    // Add or update keys from the new ladder
-    ladder[key] = newLadder[key];
+    ladder[key] = newLadder[key]; // Add or update keys
   }
 
   // Clear other reactive arrays
   prices.splice(0); // Clear prices array
   tpv.splice(0); // Clear tpv array
 
-  // Attach a new listener
   console.log("Loading data for market:", selectedMarket.selectedMarket);
   const dbRef = ref(database, `priceFeed/${selectedMarket.selectedMarket.toLowerCase()}`);
   currentListenerRef = dbRef;
-  let inputPx = 0
+
   let debounceTimeout = null;
-  onChildAdded(dbRef, (snapshot) => {
-    calcCumDelta.value = false
+
+  onChildAdded(dbRef, async (snapshot) => {
     const item = snapshot.val();
     const fromPx = roundPx(item.from.price, marketParams[selectedMarket.selectedMarket].step, true);
     const toPx = roundPx(item.to.price, marketParams[selectedMarket.selectedMarket].step, true);
 
-    if (fromPx != 0) {
+    // Update ladder "from" and "to" data
+    if (fromPx !== 0) {
       try {
         ladder[fromPx].from.push(item.from);
         ladder[fromPx].from.shift();
         ladder[fromPx].filled = 1;
       } catch (error) {
-        console.error("Error updating ladder 'from':", error);
+        console.error(`Error updating 'from' at price ${fromPx}:`, error);
       }
     }
+
     try {
       ladder[toPx].filled = 2;
       ladder[toPx].to.unshift(item.to);
       ladder[toPx].to.pop();
     } catch (error) {
-      console.error("Error updating ladder 'to':", error);
+      console.error(`Error updating 'to' at price ${toPx}:`, error);
     }
 
+    // Update prices and ensure they are sorted
     if (!prices.includes(toPx)) prices.push(toPx);
     if (!prices.includes(fromPx)) prices.push(fromPx);
     prices.sort((a, b) => b - a);
 
+    // Update UTC and other variables
     utc.utc = item.to.utc;
     updateIntervals(item.to.utc);
     tpv.unshift(item);
     if (tpv.length > 200) tpv.pop();
-    const cumulativeFromDelta = delta.from.current + Math.round(item.from.delta)
-    delta.from.max = Math.max(delta.from.max, cumulativeFromDelta)
-    delta.from.min = Math.min(delta.from.min, cumulativeFromDelta)
-    delta.from.current = cumulativeFromDelta
-    const cumulativeToDelta = delta.to.current + Math.round(item.to.delta)
-    delta.to.max = Math.max(delta.to.max, cumulativeToDelta)
-    delta.to.min = Math.min(delta.to.min, cumulativeToDelta)
-    delta.to.current = cumulativeToDelta
-    // calculateCumDelta(fromPx, toPx,ladder)
-    clearTimeout(debounceTimeout);    
-    debounceTimeout = setTimeout(() => {
-      // Run your callback after 250ms of inactivity
-      calcCumDelta.value = true;
-      console.log("Called after 250ms of no new children");
-      calculateCumDelta(fromPx, toPx,ladder)
-      // Optionally, invoke your calculation here
-      // calculateCumDelta(fromPx, toPx, ladder);
-    }, 100); // 250ms delay
-    // console.log("next...")
+
+    fromVWAP.value = (fromVWAP.value * totalVolume.value + fromPx * item.from.volume) / (totalVolume.value + item.from.volume)
+    toVWAP.value = (toVWAP.value * totalVolume.value + toPx * item.to.volume) / (totalVolume.value + item.to.volume)
+    totalVolume.value += item.from.volume
+    // fromVWAPIndex.value = findPriceIndex(prices, Math.round(fromVWAP.value/0.25)*0.25)
+    // Update cumulative deltas
+    // const cumulativeFromDelta = delta.from.current + Math.round(item.from.delta);
+    // delta.from.max = Math.max(delta.from.max, cumulativeFromDelta);
+    // delta.from.min = Math.min(delta.from.min, cumulativeFromDelta);
+    // delta.from.current = cumulativeFromDelta;
+
+    // const cumulativeToDelta = delta.to.current + Math.round(item.to.delta);
+    // delta.to.max = Math.max(delta.to.max, cumulativeToDelta);
+    // delta.to.min = Math.min(delta.to.min, cumulativeToDelta);
+    // delta.to.current = cumulativeToDelta;
+
+    // // Debounce calculation updates
+    // clearTimeout(debounceTimeout);
+    // debounceTimeout = setTimeout( () => {
+    //   calculateCumDelta(fromPx, toPx, ladder);
+    // }, 90); // Debounce delay (250ms)
   });
 };
+
 
 
 const roundPx = (px, step = 0.25, asString = false) => {
@@ -339,5 +394,8 @@ export {
   options,
   intervals,
   tpv, selectedCell, changeSelectedCell,
-  delta
+  delta,
+  fromVWAP,
+  toVWAP,
+  fromVWAPIndex
 };

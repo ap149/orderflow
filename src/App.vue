@@ -1,7 +1,8 @@
 <template>
     <div class="bg-slate-800 fixed right-0 left-0 text-white h-12 flex z-50 flex items-center justify-center px-10">
-      <div @click="goToPath('orderflow')" class="mr-12 cursor-pointer uppercase text-sm pt-1 font-bold" :class="$route.path == '/orderflow' ? 'text-white' : 'text-slate-400 hover:text-white'">orderflow</div>
       <div @click="goToPath('journal')" class="mr-12 cursor-pointer uppercase text-sm pt-1 font-bold" :class="$route.path == '/journal' ? 'text-white' : 'text-slate-400 hover:text-white'">journal</div>
+      <div @click="goToPath('orderflow')" class="mr-12 cursor-pointer uppercase text-sm pt-1 font-bold" :class="$route.path == '/orderflow' ? 'text-white' : 'text-slate-400 hover:text-white'">tradeflow</div>
+      <!-- <div @click="goToPath('delta')" class="mr-12 cursor-pointer uppercase text-sm pt-1 font-bold" :class="$route.path == '/delta' ? 'text-white' : 'text-slate-400 hover:text-white'">delta</div> -->
     </div>
   <router-view></router-view>
 </template>
