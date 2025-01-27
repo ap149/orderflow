@@ -173,9 +173,9 @@ export default {
       const step = options.step
       const vwap = from ? Math.round(fromVWAP.value/options.step)*options.step : Math.round(toVWAP.value/options.step)*options.step
       const adjPx = (parseFloat(px) + parseFloat(options.adj))
-      const classStr0 = 'bg-amber-400 text-white'
-      const classStr1 = 'bg-amber-300 text-white'
-      const classStr2 = 'bg-amber-200 '
+      const classStr0 = 'bg-amber-400 text-white font-bold'
+      const classStr1 = 'bg-amber-300 text-white font-bold'
+      const classStr2 = 'bg-amber-200  font-bold'
       if (vwap == adjPx) {
         console.log("exact vwap")
         return classStr0

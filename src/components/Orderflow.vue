@@ -3,8 +3,9 @@
     <div class="flex h-screen w-screen z-10">
       <div class="bg-slate-200 flex flex-col  absolute right-0 top-12 w-[18rem] bottom-0 pr-10 pl-8 pt-8 ">
         <div class="bg-slate-80 py- flex text-xs justify-between">
-          <div @click="handleChangeMarket('DAX')" class="text-white rounded p-1 font-bold w-20 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'DAX' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">DAX</div>
-          <div @click="handleChangeMarket('ES')" class="text-white rounded p-1 font-bold w-20 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'ES' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">ES</div>
+          <div @click="handleChangeMarket('DAX')" class="text-white rounded p-1 font-bold w-16 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'DAX' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">DAX</div>
+          <div @click="handleChangeMarket('ES')" class="text-white rounded p-1 font-bold w-16 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'ES' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">ES</div>
+          <div @click="load" class="text-white text-xxs rounded p-1 font-bold w-16 text-center cursor-pointer bg-slate-700" >LOAD</div>
           <!-- <div @click="handleChangeMarket('NQ')" class="text-white rounded p-1 font-bold w-14 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'NQ' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">NQ</div> -->
           <!-- <div @click="handleChangeMarket('NAS')" class="text-white rounded p-1 font-bold w-16 text-center cursor-pointer" :class="selectedMarket.selectedMarket == 'NAS' ? 'bg-teal-500 font-bold text-center' : 'bg-slate-300 text-slate-400 hover:bg-teal-500 hover:text-white'">ES</div> -->
         </div>
@@ -155,9 +156,10 @@ export default {
     };
     const handleChangeMarket = (instrument) => {
       changeMarket(instrument);
+      // await 
     };
     const load = () => {
-      // initOptions();
+      initOptions();
       // loadData();
     };
     const scrollToBottom = async () => {
@@ -177,7 +179,7 @@ export default {
     };    
     onMounted(() => {
       // console.log("mounted app");
-      initOptions();
+      // initOptions();
 
     });
     return {

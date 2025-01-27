@@ -17,7 +17,7 @@ const marketParams = {
     size: 10,
     hours: 8,
     mins: 0,
-    spread: 1,
+    spread: 0.9,
     high: 23000,
     low: 20500,
     step: 0.1,
@@ -34,7 +34,7 @@ const marketParams = {
     size: 25,
     hours: 14,
     mins: 30,
-    spread: 0.3,
+    spread: 0.4,
     high: 6200,
     low: 5600,
     step: 0.25,
@@ -114,7 +114,6 @@ let ladder = reactive(createLadder(selectedMarket.selectedMarket));
 let prices = reactive([]);
 let tpv = reactive([]);
 let utc = reactive({ utc: 0 });
-let calcCumDelta = vueRef(false)
 const options = reactive({
   maxVolume: 30,
   maxTotal: 30,
@@ -147,7 +146,7 @@ const changeMarket = (newMarket) => {
   selectedMarket.selectedMarket = newMarket;
 
   // Initialize options and reload data for the new market
-  initOptions();
+  // initOptions();
 };
 
 const initOptions = () => {
@@ -244,25 +243,10 @@ const calculateCumDelta = (fromPx, toPx, data) => {
     } 
   }
   
-  // // For prices below the input price
-  // for (let i = prices.length - 1; i >= 0; i--) {
-  //   const price = prices[i];
-  //   if (price < toPx) {
-  //     if (!data[price].filled) continue
-  //     cumFromDelta += data[price].from.at(-1).delta;
-  //     cumToDelta += data[price].to.at(0).delta;
-  //     resultFrom[price] = { cum_delta: cumFromDelta };
-  //     resultTo[price] = { cum_delta: cumToDelta };
-  //   } else {
-  //     break; // Stop when we pass above the inputPrice
-  //   }
-  // }
-  // console.log(result)
   deltaLadderFrom.data = resultFrom
   deltaLadderTo.data = resultTo
-  // return result;
 }
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 
 const loadData = async () => {
   // Detach the previous listener, if any
@@ -329,7 +313,7 @@ const loadData = async () => {
     utc.utc = item.to.utc;
     updateIntervals(item.to.utc);
     tpv.unshift(item);
-    if (tpv.length > 200) tpv.pop();
+    if (tpv.length > 400) tpv.pop();
 
     fromVWAP.value = (fromVWAP.value * totalVolume.value + fromPx * item.from.volume) / (totalVolume.value + item.from.volume)
     toVWAP.value = (toVWAP.value * totalVolume.value + toPx * item.to.volume) / (totalVolume.value + item.to.volume)

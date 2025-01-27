@@ -60,11 +60,13 @@ const getUTC = (iso) => {
   return new Date(iso).getTime()
 }
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export {
     formatCurrency,
     formatDate,
     formatTime,
     timeDiff,
     formatNumber,
-    getUTC
+    getUTC, delay
 }
